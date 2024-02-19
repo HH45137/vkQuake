@@ -8,6 +8,8 @@ option(use_codec_mp3 "Use codec mp3")
 set(mp3_lib "mad" CACHE STRING "Use mp3 lib")
 option(use_codec_vorbis "Use codec vorbis")
 set(vorbis_lib "vorbis" CACHE STRING "Use vorbis lib")
+option(use_codec_opus "Use codec opus")
+
 
 set(srcs
     "Quake/bgmusic.c"
@@ -155,5 +157,12 @@ if(CMAKE_HOST_APPLE)
         endif()
     endif()
     
+    find_library(opus "opus" use_codec_opus)
+    find_library(opusfile "opusfile" use_codec_opus)
+    if(opus AND opusfile)
+        set(srcs ${srcs} "Quake/snd_opus.c")
+        message("Add flag: -DUSE_CODEC_OPUS")
+        target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_OPUS")
+    endif()
 
 endif()
