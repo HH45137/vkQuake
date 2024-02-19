@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.5)
 set(prjname "vkquake")
 project(${prjname})
 
+option(use_codec_wave "Use codec wave")
+option(mp3_lib "Use mp3 lib" "mad")
+
 set(srcs
     "Quake/bgmusic.c"
     "Quake/cd_null.c"
@@ -102,10 +105,25 @@ if(CMAKE_HOST_APPLE)
 
     find_library(moltenvk "MoltenVK")
 
-    find_library(mpg123 "mpg123")
-    if(mpg123)
-        message("Append library: mpg123")
-        set(srcs ${srcs} "Quake/snd_mpg123.c" "Quake/snd_mp3tag.c")
+    if(use_codec_wave)
+        message("Add flag: -DUSE_CODEC_WAVE")
+        target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_WAVE")
+    endif()
+
+    if(mp3_lib)
+        find_library(mad "mad" mp3_lib)
+        if(mad)
+            message("Append library: mad")
+            set(srcs ${srcs} "Quake/snd_mp3.c" "Quake/snd_mp3tag.c")
+            target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_MP3")
+        endif()
+    else()
+        find_library(mpg123 "mpg123" mp3_lib)
+        if(mpg123)
+            message("Append library: mpg123")
+            set(srcs ${srcs} "Quake/snd_mpg123.c" "Quake/snd_mp3tag.c")
+            target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_MP3")
+        endif()
     endif()
 
     find_library(flac "flac")
