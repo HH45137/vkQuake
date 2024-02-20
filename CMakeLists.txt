@@ -51,8 +51,17 @@ foreach(shader ${shaders})
         ${glslang}\ -V \ 
         -o \ ${shader_name}.spv \ 
         ${shader} \ 
+        --depfile \ 
+        ${shader_name}.deps \ 
+        &&
     )
-    message(${glslang_command})
+    # message(${glslang_command})
+
+    add_custom_command(
+        OUTPUT out_shaders
+        DEPENDS ${shader_name}.deps
+        COMMAND glslang_command
+    )
 
 endforeach()
 
