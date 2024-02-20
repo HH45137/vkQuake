@@ -3,6 +3,63 @@ cmake_minimum_required(VERSION 3.5)
 set(prjname "vkquake")
 project(${prjname})
 
+# ------------------ Shader Codes ------------------
+set(shaders
+    "Shaders/alias.frag"
+    "Shaders/alias.vert"
+    "Shaders/alias_alphatest.frag"
+    "Shaders/md5.vert"
+    "Shaders/basic.frag"
+    "Shaders/basic.vert"
+    "Shaders/basic_alphatest.frag"
+    "Shaders/basic_notex.frag"
+    "Shaders/cs_tex_warp.comp"
+    "Shaders/indirect.comp"
+    "Shaders/indirect_clear.comp"
+    "Shaders/postprocess.frag"
+    "Shaders/postprocess.vert"
+    "Shaders/screen_effects_10bit.comp"
+    "Shaders/screen_effects_10bit_scale.comp"
+    "Shaders/screen_effects_10bit_scale_sops.comp"
+    "Shaders/screen_effects_8bit.comp"
+    "Shaders/screen_effects_8bit_scale.comp"
+    "Shaders/screen_effects_8bit_scale_sops.comp"
+    "Shaders/showtris.frag"
+    "Shaders/showtris.vert"
+    "Shaders/sky_box.frag"
+    "Shaders/sky_cube.frag"
+    "Shaders/sky_cube.vert"
+    "Shaders/sky_layer.frag"
+    "Shaders/sky_layer.vert"
+    "Shaders/update_lightmap.comp"
+    "Shaders/update_lightmap_rt.comp"
+    "Shaders/world.frag"
+    "Shaders/world.vert"
+    "Shaders/ray_debug.comp"
+)
+
+find_program(glslang "glslangValidator")
+find_program(spirv_opt "spirv-opt")
+find_program(spirv_remap "spirv-remap")
+
+add_executable(bintoc "Shaders/bintoc.c")
+
+set(shaders_c)
+foreach(shader ${shaders})
+    get_filename_component(shader_name ${shader} NAME)
+    set(glslang_command 
+        ${glslang}\ -V \ 
+        -o \ ${shader_name}.spv \ 
+        ${shader} \ 
+    )
+    message(${glslang_command})
+
+endforeach()
+
+
+
+# ------------------ C Codes ------------------
+
 option(use_codec_wave "Use codec wave")
 option(use_codec_mp3 "Use codec mp3")
 set(mp3_lib "mad" CACHE STRING "Use mp3 lib")
@@ -110,7 +167,7 @@ else()
 endif()
 
 
-add_executable(${prjname} ${srcs})
+add_executable(${prjname} ${srcs} ${shaders_c})
 
 
 target_compile_definitions(${prjname}
