@@ -10,7 +10,6 @@ option(use_codec_vorbis "Use codec vorbis")
 set(vorbis_lib "vorbis" CACHE STRING "Use vorbis lib")
 option(use_codec_opus "Use codec opus")
 
-
 set(srcs
     "Quake/bgmusic.c"
     "Quake/cd_null.c"
@@ -92,77 +91,71 @@ set(srcs
 	"Quake/embedded_pak.c"
 )
 
+find_library(m_dep "m" REQUIRED)
+find_library(dl_dep "dl" REQUIRED)
+
+find_package(SDL2 REQUIRED)
+find_library(SDL2_LIBRARY "sdl2")
+
+find_package(Vulkan)
+find_library(moltenvk_dep "moltenvk")
+
+# ---------- mp3 ----------
+if(${mp3_lib} STREQUAL "mad")
+    message("Include mad header files")    
+    set(srcs ${srcs} "Quake/snd_mp3.c" "Quake/snd_mp3tag.c")
+else()
+    message("Include mpg123 header files")    
+    set(srcs ${srcs} "Quake/snd_mpg123.c" "Quake/snd_mp3tag.c")
+endif()
+
+
 add_executable(${prjname} ${srcs})
 
+
 target_compile_definitions(${prjname}
-    PRIVATE "-Wall"
-    PRIVATE "-Wno-trigraphs"
-    PRIVATE "-Wno-unused-function"
-    PRIVATE "-Werror"
+    PRIVATE "Wall"
+    PRIVATE "Wno-trigraphs"
+    PRIVATE "Wno-unused-function"
+    PRIVATE "Werror"
 )
 
-if(CMAKE_HOST_APPLE)
-    message("Current maching is Apple")
+# ---------- Other ----------
+target_link_libraries(${prjname} ${m_dep})
+target_link_libraries(${prjname} ${dl_dep})
 
-    find_library(sdl2 "sdl2" REQUIRED)
-    find_library(m "m" REQUIRED)
-    find_library(dl "dl" REQUIRED)
+# ---------- SDL2 ----------
+if(SDL2_FOUND)
+    message("Add SDL2")
+    include_directories(${prjname} ${SDL2_INCLUDE_DIR})
+    target_link_libraries(${prjname} ${SDL2_LIBRARY})
+endif()
 
-    find_library(moltenvk "MoltenVK")
+# ---------- Vulkan ----------
+if(Vulkan_FOUND)
+    message("Add Vulkan")
+    include_directories(${prjname} ${Vulkan_INCLUDE_DIRS})
+    # target_link_libraries(${prjname} ${Vulkan_LIBRARY})
+    target_link_libraries(${prjname} ${moltenvk_dep})
+endif()
 
-    if(use_codec_wave)
-        message("Add flag: -DUSE_CODEC_WAVE")
-        target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_WAVE")
-    endif()
+# ---------- use_codec_wave ----------
+if(use_codec_wave)
+    message("Add flag: USE_CODEC_WAVE")
+    target_compile_definitions(${prjname} PRIVATE "USE_CODEC_WAVE")
+endif()
 
-    if(mp3_lib STREQUAL "mad")
-        find_library(mad "mad" use_codec_mp3)
-        if(mad)
-            message("Append library: mad")
-            set(srcs ${srcs} "Quake/snd_mp3.c" "Quake/snd_mp3tag.c")
-            message("Add flag: -DUSE_CODEC_MP3")
-            target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_MP3")
-        endif()
-    else()
-        find_library(mpg123 "mpg123" use_codec_mp3)
-        if(mpg123)
-            message("Append library: mpg123")
-            set(srcs ${srcs} "Quake/snd_mpg123.c" "Quake/snd_mp3tag.c")
-            message("Add flag: -DUSE_CODEC_MP3")
-            target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_MP3")
-        endif()
-    endif()
-
-    find_library(flac "flac")
-    if(flac)
-        message("Append library: flac")
-        set(srcs ${srcs} "Quake/snd_flac.c")
-    endif()
-
-    find_library(ogg "ogg" use_codec_vorbis)
-    if(vorbis_lib STREQUAL "vorbis")
-        find_library(vorbisfile "vorbisfile" use_codec_vorbis)
-        find_library(vorbis "vorbis" use_codec_vorbis)
-        if(ogg AND vorbisfile AND vorbis)
-            set(srcs ${srcs} "Quake/snd_vorbis.c")
-            message("Add flag: -DUSE_CODEC_VORBIS")
-            target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_VORBIS")
-        endif()
-    else()
-        find_library(vorbisidec "vorbisidec" use_codec_vorbis)
-        if(ogg AND vorbisidec)
-            set(srcs ${srcs} "Quake/snd_vorbis.c")
-            message("Add flag: -DUSE_CODEC_VORBIS -DVORBIS_USE_TREMOR")
-            target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_VORBIS" "-DVORBIS_USE_TREMOR")
-        endif()
-    endif()
+# ---------- mp3 ----------
+if(${mp3_lib} STREQUAL "mad")
+    message("Use mad library")
     
-    find_library(opus "opus" use_codec_opus)
-    find_library(opusfile "opusfile" use_codec_opus)
-    if(opus AND opusfile)
-        set(srcs ${srcs} "Quake/snd_opus.c")
-        message("Add flag: -DUSE_CODEC_OPUS")
-        target_compile_definitions(${prjname} PRIVATE "-DUSE_CODEC_OPUS")
-    endif()
+    find_library(mad_dep "mad")
+    target_link_libraries(${prjname} ${mad_dep})
+    
+    message("Add flag: USE_CODEC_MP3")
+    target_compile_definitions(${prjname} PRIVATE "USE_CODEC_MP3")
+else()
+    message("Use mpg123 library")    
 
 endif()
+
