@@ -27,3 +27,11 @@ find . -type f -name "*.comp" | \
     done
 
 
+find . -type f -name "./Compiled/*.vspv" | \
+    for file in ./Compiled/*.vspv; do ./bintoc ${file} `basename ${file%.*}`_vert_spv ${file%.*}_vert.c; done
+
+find . -type f -name "./Compiled/*.fspv" | \
+    for file in ./Compiled/*.fspv; do ./bintoc ${file} `basename ${file%.*}`_frag_spv ${file%.*}_frag.c; done
+
+find . -type f -name "./Compiled/*.cspv" | \
+    for file in ./Compiled/*.cspv; do ./bintoc ${file} `basename ${file%.*}`_comp_spv ${file%.*}_comp.c; done
