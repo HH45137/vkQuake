@@ -8,10 +8,22 @@ then
 fi
 
 
-mkdir ./Compiled
-
 find . -type f -name "*.vert" | \
-    for file in *.vert ; do $VULKAN_SDK/bin/glslangValidator -V ${file} -o "./Compiled/${file%.*}.vspv"; done
+    for file in *.vert; do $VULKAN_SDK/bin/glslangValidator -V ${file} -o "./Compiled/${file%.*}.vspv"; done
 
 find . -type f -name "*.frag" | \
-    for file in *.frag ; do $VULKAN_SDK/bin/glslangValidator -V ${file} -o "./Compiled/${file%.*}.fspv"; done
+    for file in *.frag; do $VULKAN_SDK/bin/glslangValidator -V ${file} -o "./Compiled/${file%.*}.fspv"; done
+
+find . -type f -name "*.comp" | \
+    for file in *.comp; 
+    do
+        filename=${file}
+        substring="sops"    
+        if test "${filename#*$substring}" != "$filename"; then
+            $VULKAN_SDK/bin/glslangValidator -V ${file} --target-env vulkan1.3 -o "./Compiled/${file%.*}.cspv"; 
+        else
+            $VULKAN_SDK/bin/glslangValidator -V ${file} -o "./Compiled/${file%.*}.cspv"; 
+        fi
+    done
+
+
