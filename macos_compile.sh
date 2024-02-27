@@ -2,7 +2,8 @@
 
 VULKAN_SDK=~/VulkanSDK/1.3.268.1/macOS/
 
-cd ./Shaders/
+SCRIPT_DIR=$(dirname "$0") 
+cd $SCRIPT_DIR/Shaders/
 
 if [[ ! -x "./bintoc" ]]
 then

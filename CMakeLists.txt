@@ -4,9 +4,8 @@ set(prjname "vkquake")
 project(${prjname})
 
 # ------------------ Shaders Compile ------------------
-execute_process (
-    COMMAND ${CMAKE_SOURCE_DIR}/macos_compile.sh
-)
+message("Start compile shaders form bin to c files")
+execute_process (COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/macos_compile.sh)
 
 # ------------------ C Codes ------------------
 
