@@ -3,69 +3,10 @@ cmake_minimum_required(VERSION 3.5)
 set(prjname "vkquake")
 project(${prjname})
 
-# ------------------ Shader Codes ------------------
-set(shaders
-    "Shaders/alias.frag"
-    "Shaders/alias.vert"
-    "Shaders/alias_alphatest.frag"
-    "Shaders/md5.vert"
-    "Shaders/basic.frag"
-    "Shaders/basic.vert"
-    "Shaders/basic_alphatest.frag"
-    "Shaders/basic_notex.frag"
-    "Shaders/cs_tex_warp.comp"
-    "Shaders/indirect.comp"
-    "Shaders/indirect_clear.comp"
-    "Shaders/postprocess.frag"
-    "Shaders/postprocess.vert"
-    "Shaders/screen_effects_10bit.comp"
-    "Shaders/screen_effects_10bit_scale.comp"
-    "Shaders/screen_effects_10bit_scale_sops.comp"
-    "Shaders/screen_effects_8bit.comp"
-    "Shaders/screen_effects_8bit_scale.comp"
-    "Shaders/screen_effects_8bit_scale_sops.comp"
-    "Shaders/showtris.frag"
-    "Shaders/showtris.vert"
-    "Shaders/sky_box.frag"
-    "Shaders/sky_cube.frag"
-    "Shaders/sky_cube.vert"
-    "Shaders/sky_layer.frag"
-    "Shaders/sky_layer.vert"
-    "Shaders/update_lightmap.comp"
-    "Shaders/update_lightmap_rt.comp"
-    "Shaders/world.frag"
-    "Shaders/world.vert"
-    "Shaders/ray_debug.comp"
+# ------------------ Shaders Compile ------------------
+execute_process (
+    COMMAND ${CMAKE_SOURCE_DIR}/macos_compile.sh
 )
-
-find_program(glslang "glslangValidator")
-find_program(spirv_opt "spirv-opt")
-find_program(spirv_remap "spirv-remap")
-
-add_executable(bintoc "Shaders/bintoc.c")
-
-set(shaders_c)
-foreach(shader ${shaders})
-    get_filename_component(shader_name ${shader} NAME)
-    set(glslang_command 
-        ${glslang}\ -V \ 
-        -o \ ${shader_name}.spv \ 
-        ${shader} \ 
-        --depfile \ 
-        ${shader_name}.deps \ 
-        &&
-    )
-    # message(${glslang_command})
-
-    add_custom_command(
-        OUTPUT out_shaders
-        DEPENDS ${shader_name}.deps
-        COMMAND glslang_command
-    )
-
-endforeach()
-
-
 
 # ------------------ C Codes ------------------
 
