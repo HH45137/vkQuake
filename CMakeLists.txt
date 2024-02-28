@@ -6,6 +6,7 @@ project(${prjname})
 # ------------------ Shaders Compile ------------------
 message("Start compile shaders form bin to c files")
 execute_process (COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/macos_compile.sh)
+file(GLOB shader_srcs "./Shaders/Compiled/*.c")
 
 # ------------------ C Codes ------------------
 
@@ -16,6 +17,7 @@ option(use_codec_vorbis "Use codec vorbis")
 set(vorbis_lib "vorbis" CACHE STRING "Use vorbis lib")
 option(use_codec_opus "Use codec opus")
 
+file(GLOB headers "./Quake/*.h")
 set(srcs
     "Quake/bgmusic.c"
     "Quake/cd_null.c"
@@ -116,7 +118,8 @@ else()
 endif()
 
 
-add_executable(${prjname} ${srcs} ${shaders_c})
+source_group("Shaders" ${CMAKE_SOURCE_DIR} FILES ${shader_srcs})
+add_executable(${prjname} ${srcs} ${headers} ${shader_srcs})
 
 
 target_compile_definitions(${prjname}
